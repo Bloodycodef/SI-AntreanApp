@@ -1,0 +1,11 @@
+### Register User
+POST http://localhost:4000/auth/register
+Content-Type: application/json
+
+{
+  "email": "akuntumbal221203@gmail.com",
+  "password": "password123",
+  "role": "user",
+  "fullName": "Wahyu Saputra",
+  "phone": "08123456789"
+}

@@ -1,0 +1,56 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  user
+  company
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  password   String
+  role       Role
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  // relations
+  company   Company?
+  profile   UserProfile?
+  emailVerificationToken EmailVerificationToken?
+}
+
+model EmailVerificationToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int      @unique
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Company {
+  id          Int    @id @default(autoincrement())
+  userId      Int    @unique
+  companyName String
+  industry    String?
+  website     String?
+  address     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserProfile {
+  id       Int    @id @default(autoincrement())
+  userId   Int    @unique
+  fullName String
+  phone    String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
