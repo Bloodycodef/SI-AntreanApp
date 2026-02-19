@@ -1,9 +1,15 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
+
 import { prisma } from "../config/prisma";
-import { RegisterRequestBody } from "../types/auth";
+import { RegisterRequestBody, LoginRequestBody } from "../types/auth";
 import { sendVerificationEmail } from "../utils/verificationEmail";
+import { JwtPayload } from "../types/jwt";
+
+const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET!;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
 
 //REGISTER NEW USER
 export const register = async (
@@ -102,6 +108,120 @@ export const register = async (
   }
 };
 
+export const login = async (
+  req: Request<{}, {}, LoginRequestBody>,
+  res: Response,
+): Promise<Response> => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email dan password wajib diisi" });
+  }
+
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user || !user.isVerified) {
+    return res.status(401).json({ message: "Email atau password salah" });
+  }
+
+  const match = await bcrypt.compare(password, user.password);
+  if (!match) {
+    return res.status(401).json({ message: "Email atau password salah" });
+  }
+
+  const payload: JwtPayload = {
+    userId: String(user.id),
+    role: user.role,
+  };
+
+  const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET!, {
+    expiresIn: "15m",
+  });
+
+  const refreshToken = jwt.sign(
+    { userId: String(user.id) },
+    process.env.JWT_REFRESH_SECRET!,
+    { expiresIn: "7d" },
+  );
+
+  const hashedRefreshToken = crypto
+    .createHash("sha256")
+    .update(refreshToken)
+    .digest("hex");
+
+  await prisma.refreshToken.create({
+    data: {
+      userId: user.id,
+      token: hashedRefreshToken,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    },
+  });
+
+  res.cookie("access_token", accessToken, {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 15 * 60 * 1000,
+  });
+
+  res.cookie("refresh_token", refreshToken, {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  return res.status(200).json({
+    message: "Login berhasil",
+    role: user.role,
+  });
+};
+
+export const logout = async (
+  req: Request,
+  res: Response,
+): Promise<Response> => {
+  try {
+    const refreshToken = req.cookies?.refresh_token;
+
+    if (!refreshToken) {
+      res.clearCookie("access_token");
+      res.clearCookie("refresh_token");
+      return res.status(200).json({ message: "Logout berhasil" });
+    }
+
+    const hashedRefreshToken = crypto
+      .createHash("sha256")
+      .update(refreshToken)
+      .digest("hex");
+
+    await prisma.refreshToken.deleteMany({
+      where: { token: hashedRefreshToken },
+    });
+
+    res.clearCookie("access_token", {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    });
+
+    res.clearCookie("refresh_token", {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    });
+
+    return res.status(200).json({
+      message: "logout berhasil",
+    });
+  } catch (error) {
+    console.error("LOGOUT ERROR:", error);
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
 export const verifyEmail = async (
   req: Request,
   res: Response,
@@ -142,4 +262,45 @@ export const verifyEmail = async (
   res.status(200).json({
     message: "Email berhasil diverifikasi",
   });
+};
+
+export const refreshToken = async (req: Request, res: Response) => {
+  const token = req.cookies?.refresh_token;
+  if (!token) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as {
+    userId: string;
+  };
+
+  const hashed = crypto.createHash("sha256").update(token).digest("hex");
+
+  const stored = await prisma.refreshToken.findFirst({
+    where: { userId: Number(payload.userId), token: hashed },
+  });
+
+  if (!stored || stored.expiresAt < new Date()) {
+    return res.status(401).json({ message: "Refresh token invalid" });
+  }
+
+  await prisma.refreshToken.delete({ where: { id: stored.id } });
+
+  const newPayload: JwtPayload = {
+    userId: payload.userId,
+    role: "user", // bisa fetch ulang kalau perlu
+  };
+
+  const newAccessToken = jwt.sign(newPayload, process.env.JWT_ACCESS_SECRET!, {
+    expiresIn: "15m",
+  });
+
+  res.cookie("access_token", newAccessToken, {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 15 * 60 * 1000,
+  });
+
+  return res.json({ message: "Token refreshed" });
 };

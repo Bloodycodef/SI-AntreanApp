@@ -3,7 +3,8 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
-
+import crypto from "crypto";
+import { prisma } from "./config/prisma";
 import authRoutes from "./routes/auth";
 
 dotenv.config();
@@ -34,4 +35,5 @@ const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+  console.log(Object.keys(prisma));
 });

@@ -1,4 +1,3 @@
-// src/types/auth.ts
 export type RegisterRequestBody = {
   email: string;
   password: string;
@@ -13,4 +12,9 @@ export type RegisterRequestBody = {
   industry?: string;
   website?: string;
   address?: string;
+};
+
+export type LoginRequestBody = {
+  email: string;
+  password: string;
 };

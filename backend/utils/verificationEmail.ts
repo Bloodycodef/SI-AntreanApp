@@ -1,4 +1,3 @@
-// src/utils/sendVerificationEmail.ts
 import nodemailer from "nodemailer";
 
 export const sendVerificationEmail = async (

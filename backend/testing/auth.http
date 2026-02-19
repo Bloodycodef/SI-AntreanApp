@@ -5,7 +5,35 @@ Content-Type: application/json
 {
   "email": "akuntumbal221203@gmail.com",
   "password": "password123",
-  "role": "user",
+  "role": "company",
   "fullName": "Wahyu Saputra",
   "phone": "08123456789"
 }
+
+
+### register company
+POST http://localhost:4000/auth/register
+Content-Type: application/json
+
+{
+    "email": "akuntumbal221203@gmail.com",
+  "password": "Password123",
+  "role": "company",
+  "companyName": "PT Maju Jaya Sejahtera",
+  "industry": "Technology",
+  "website": "https://majujaya.co.id",
+  "address": "Jl. Sudirman No. 123, Jakarta"
+
+}
+
+### login
+POST http://localhost:4000/auth/login
+Content-Type: application/json
+
+{
+    "email": "akuntumbal221203@gmail.com",
+  "password": "Password123"
+}
+
+### logout
+POST http://localhost:4000/auth/logout

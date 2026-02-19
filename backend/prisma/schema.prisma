@@ -20,10 +20,22 @@ model User {
   isVerified Boolean  @default(false)
   createdAt  DateTime @default(now())
 
-  // relations
   company   Company?
   profile   UserProfile?
   emailVerificationToken EmailVerificationToken?
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model EmailVerificationToken {
