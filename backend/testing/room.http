@@ -1,0 +1,25 @@
+@baseUrl = http://localhost:4000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwicm9sZSI6ImNvbXBhbnkiLCJpYXQiOjE3NzE5MzU3NTgsImV4cCI6MTc3MTkzNjY1OH0.brsyKaFQxrEdJOt_VJAF9jTOewTN3CDdxNMyHajNCtw; Max-Age=900; Path=/; Expires=Tue, 24 Feb 2026 12:37:38 GMT; HttpOnly; SameSite=Strict,refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwiaWF0IjoxNzcxOTM1NzU4LCJleHAiOjE3NzI1NDA1NTh9.QxoAkYAGLJ-R7OX5KlV3hrOlE7k-80btVQb6osx6b1Y
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "akuntumbal221203@gmail.com",
+  "password": "Password123"
+}
+
+
+### Create Room
+POST {{baseUrl}}/rooms
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Customer Service",
+  "description": "Main queue for customer service"
+}
+
+### Get Rooms
+GET {{baseUrl}}/rooms
+Authorization: Bearer {{token}}
+Content-Type: application/json

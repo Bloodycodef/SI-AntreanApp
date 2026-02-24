@@ -6,6 +6,8 @@ import dotenv from "dotenv";
 import crypto from "crypto";
 import { prisma } from "./config/prisma";
 import authRoutes from "./routes/auth";
+import roomRoutes from "./routes/room";
+import transactionRoutes from "./routes/transaction";
 
 dotenv.config();
 
@@ -24,6 +26,8 @@ app.use(cookieParser());
 
 /* ================= ROUTES ================= */
 app.use("/auth", authRoutes);
+app.use("/rooms", roomRoutes);
+app.use("/queue", transactionRoutes);
 
 /* ================= HEALTH CHECK ================= */
 app.get("/", (_req, res) => {

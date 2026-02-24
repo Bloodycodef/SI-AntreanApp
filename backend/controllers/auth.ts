@@ -4,9 +4,9 @@ import crypto from "crypto";
 import jwt from "jsonwebtoken";
 
 import { prisma } from "../config/prisma";
-import { RegisterRequestBody, LoginRequestBody } from "../types/auth";
+import { RegisterRequestBody, LoginRequestBody } from "../types/index";
 import { sendVerificationEmail } from "../utils/verificationEmail";
-import { JwtPayload } from "../types/jwt";
+import { JwtPayload } from "../types/index";
 
 const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET!;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
@@ -173,7 +173,12 @@ export const login = async (
 
   return res.status(200).json({
     message: "Login berhasil",
-    role: user.role,
+    user: {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      createdAt: user.createdAt,
+    },
   });
 };
 

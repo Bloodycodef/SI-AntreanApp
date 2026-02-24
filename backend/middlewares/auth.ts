@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { JwtPayload } from "../types/jwt";
+import { JwtPayload } from "../types/index";
 
 const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET!;
 
@@ -20,7 +20,7 @@ export const authenticate = (
     const decoded = jwt.verify(token, JWT_ACCESS_SECRET) as JwtPayload;
 
     req.user = {
-      userId: Number(decoded.userId),
+      id: Number(decoded.userId), // ✅ FIXED
       role: decoded.role,
     };
 

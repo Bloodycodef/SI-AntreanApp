@@ -1,6 +1,5 @@
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -12,6 +11,22 @@ enum Role {
   company
 }
 
+enum QueueStatus {
+  waiting    // in queue, not yet called
+  serving    // currently being served
+  done       // completed
+  skipped    // didn't respond when called
+  cancelled  // left the queue
+}
+
+enum SessionStatus {
+  active
+  paused
+  closed
+}
+
+// ─── EXISTING MODELS ──────────────────────────────────────────────────────────
+
 model User {
   id         Int      @id @default(autoincrement())
   email      String   @unique
@@ -20,10 +35,11 @@ model User {
   isVerified Boolean  @default(false)
   createdAt  DateTime @default(now())
 
-  company   Company?
-  profile   UserProfile?
+  company    Company?
+  profile    UserProfile?
   emailVerificationToken EmailVerificationToken?
-  refreshTokens RefreshToken[]
+  refreshTokens          RefreshToken[]
+  queueTickets           QueueTicket[]
 }
 
 model RefreshToken {
@@ -48,21 +64,81 @@ model EmailVerificationToken {
 }
 
 model Company {
-  id          Int    @id @default(autoincrement())
-  userId      Int    @unique
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique
   companyName String
   industry    String?
   website     String?
   address     String?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rooms Room[]
 }
 
 model UserProfile {
-  id       Int    @id @default(autoincrement())
-  userId   Int    @unique
+  id       Int     @id @default(autoincrement())
+  userId   Int     @unique
   fullName String
   phone    String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── ROOM ─────────────────────────────────────────────────────────────────────
+
+model Room {
+  id          Int      @id @default(autoincrement())
+  companyId   Int
+  name        String   // e.g. "Customer Service", "Clinic Queue"
+  description String?
+  secretKey   String   @unique  // user enters this to join the queue
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company  Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  sessions QueueSession[]
+
+  @@index([companyId])
+}
+
+// ─── QUEUE SESSION ─────────────────────────────────────────────────────────────
+// Company manually opens and resets the queue via this model.
+// One active session per room at a time.
+
+model QueueSession {
+  id            Int           @id @default(autoincrement())
+  roomId        Int
+  status        SessionStatus @default(active)
+  currentNumber Int           @default(0)  // last issued number
+  calledNumber  Int           @default(0)  // current number being served (company controls)
+  openedAt      DateTime      @default(now())
+  closedAt      DateTime?
+
+  room    Room          @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  tickets QueueTicket[]
+
+  @@index([roomId])
+}
+
+// ─── QUEUE TICKET ──────────────────────────────────────────────────────────────
+// Created when a user joins a room using the secretKey and takes a number.
+
+model QueueTicket {
+  id          Int         @id @default(autoincrement())
+  sessionId   Int
+  userId      Int
+  number      Int         // queue number e.g. 1, 2, 3...
+  status      QueueStatus @default(waiting)
+  createdAt   DateTime    @default(now())  // when they joined
+  calledAt    DateTime?                   // when their number was called
+  completedAt DateTime?                   // when done/skipped/cancelled
+
+  session QueueSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, number])  // no duplicate numbers in same session
+  @@unique([sessionId, userId])  // one ticket per user per session
+  @@index([sessionId])
+  @@index([userId])
 }
