@@ -44,6 +44,13 @@ declare global {
 export interface CreateRoomDTO {
   name: string;
   description?: string;
+  fields: CreateRoomFieldDTO[];
+}
+
+export interface CreateRoomFieldDTO {
+  label: string;
+  type: "text" | "number" | "email";
+  required: boolean;
 }
 
 export interface UpdateRoomDTO {
@@ -127,8 +134,20 @@ export interface CreateEmailVerificationTokenDTO {
   expiresAt: Date;
 }
 
-export interface JoinQueueDTO {
+export interface JoinRoomAnswerDTO {
+  fieldId: number;
+  value: string;
+}
+
+export interface JoinRoomDTO {
   secretKey: string;
+  answers: JoinRoomAnswerDTO[];
+}
+
+//update ticket status
+
+export interface UpdateTicketStatusDTO {
+  status: QueueStatus;
 }
 
 export {};

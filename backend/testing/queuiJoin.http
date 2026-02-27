@@ -1,12 +1,5 @@
 @baseUrl = http://localhost:4000
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NzE5MzY2MjIsImV4cCI6MTc3MTkzNzUyMn0.PmMwTx7SNhkMowjIcNWrRAOeXOyRLLp0MxlqgChW-cM; Max-Age=900; Path=/; Expires=Tue, 24 Feb 2026 12:52:02 GMT; HttpOnly; SameSite=Strict,refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyIiwiaWF0IjoxNzcxOTM2NjIyLCJleHAiOjE3NzI1NDE0MjJ9.07sZ7cNfiDJeSNNSaEkThKs8SM_IRtHgusN_ZHxI8LY
-Content-Type: application/json
-
-{
-    "email": "akuntumbal221203@gmail.com",
-  "password": "Password123"
-}
-
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NzIxNjc4NzMsImV4cCI6MTc3MjE2ODc3M30.2RRTxXtr5KYJ-RpdIU3tE8dPDC1HqUnbaqvjI-90a8A; Max-Age=900; Path=/; Expires=Fri, 27 Feb 2026 05:06:13 GMT; HttpOnly; SameSite=Strict,refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzIiwiaWF0IjoxNzcyMTY3ODczLCJleHAiOjE3NzI3NzI2NzN9._-uk1GIw7DQluyviHXCRfSiAXn8D7bvzj6otmGnOIhc
 POST http://localhost:4000/auth/login
 Content-Type: application/json
 
@@ -15,12 +8,30 @@ Content-Type: application/json
   "password":"Password123"
 }
 
+### login user 2
+POST http://localhost:4000/auth/login
+Content-Type: application/json
+
+{
+  "email":"bengkelsarimertaproject@gmail.com",
+  "password":"Password123"
+  }
 
 ### Create Transaction
 POST http://localhost:4000/queue/join
 Content-Type: application/json
-Cookie: access_token=PASTE_FROM_LOGIN; refresh_token=PASTE_FROM_LOGIN
+Authorization: Bearer {{token}}
 
 {
-  "secretKey": "e6e5b4c9"
+  "secretKey": "be520c93",
+  "answers": [
+    {
+      "fieldId": 1,
+      "value": "satyawati natha"
+    },
+    {
+      "fieldId": 2,
+      "value": "3328191919"
+    }
+  ]
 }

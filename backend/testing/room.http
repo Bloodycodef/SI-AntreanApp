@@ -1,5 +1,5 @@
 @baseUrl = http://localhost:4000
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwicm9sZSI6ImNvbXBhbnkiLCJpYXQiOjE3NzE5MzU3NTgsImV4cCI6MTc3MTkzNjY1OH0.brsyKaFQxrEdJOt_VJAF9jTOewTN3CDdxNMyHajNCtw; Max-Age=900; Path=/; Expires=Tue, 24 Feb 2026 12:37:38 GMT; HttpOnly; SameSite=Strict,refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwiaWF0IjoxNzcxOTM1NzU4LCJleHAiOjE3NzI1NDA1NTh9.QxoAkYAGLJ-R7OX5KlV3hrOlE7k-80btVQb6osx6b1Y
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwicm9sZSI6ImNvbXBhbnkiLCJpYXQiOjE3NzIxNjc2MzYsImV4cCI6MTc3MjE2ODUzNn0.53_H5p2DW3Rg0IuaxXVggdBA82yC1OAxHBJFOlQengc; Max-Age=900; Path=/; Expires=Fri, 27 Feb 2026 05:02:16 GMT; HttpOnly; SameSite=Strict,refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwiaWF0IjoxNzcyMTY3NjM2LCJleHAiOjE3NzI3NzI0MzZ9.VTe7mGNYVTImDOHp1qOHDpGddY0u7BwUhNOWvGqDUrU
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
@@ -15,8 +15,20 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "name": "Customer Service",
-  "description": "Main queue for customer service"
+  "name": "Customer Service Room",
+  "description": "Queue for customer support",
+  "fields": [
+    {
+      "label": "Full Name",
+      "type": "text",
+      "required": true
+    },
+    {
+      "label": "ID Card Number",
+      "type": "number",
+      "required": true
+    }
+  ]
 }
 
 ### Get Rooms

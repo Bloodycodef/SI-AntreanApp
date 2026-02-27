@@ -36,14 +36,33 @@ export const storeRoom = async (
       });
     }
 
-    // 4️⃣ CREATE ROOM
-    const room = await prisma.room.create({
-      data: {
-        companyId: company.id,
-        name: req.body.name,
-        description: req.body.description,
-        secretKey: crypto.randomBytes(4).toString("hex"),
-      },
+    if (!req.body.fields || req.body.fields.length === 0) {
+      return res.status(400).json({
+        message: "Room must have at least one field",
+      });
+    }
+
+    const room = await prisma.$transaction(async (tx) => {
+      const newRoom = await tx.room.create({
+        data: {
+          companyId: company.id,
+          name: req.body.name,
+          description: req.body.description,
+          secretKey: crypto.randomBytes(4).toString("hex"),
+          formFields: {
+            create: req.body.fields.map((field) => ({
+              label: field.label,
+              type: field.type,
+              required: field.required,
+            })),
+          },
+        },
+        include: {
+          formFields: true,
+        },
+      });
+
+      return newRoom;
     });
 
     return res.status(201).json(room);

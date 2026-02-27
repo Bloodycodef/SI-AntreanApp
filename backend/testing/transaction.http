@@ -1,0 +1,16 @@
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwicm9sZSI6ImNvbXBhbnkiLCJpYXQiOjE3NzIxNzEyMDQsImV4cCI6MTc3MjE3MjEwNH0.QqZmnmfAaf1Yr3oVd971dE7RBi9P2kNIWAzVzxiImpM; Max-Age=900; Path=/; Expires=Fri, 27 Feb 2026 06:01:44 GMT; HttpOnly; SameSite=Strict,refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwiaWF0IjoxNzcyMTcxMjA0LCJleHAiOjE3NzI3NzYwMDR9.WgnRAbcnyNgFlPBZag64psQXyQY2P15zAwIiVpuNQ3E
+
+{
+    "email": "akuntumbal221203@gmail.com",
+  "password": "Password123"
+}
+
+
+### update ticket status
+PATCH http://localhost:4000/transactions/ticket/4/status
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "done"
+}

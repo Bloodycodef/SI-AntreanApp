@@ -1,9 +1,10 @@
+import { Express } from "express";
 import { Router } from "express";
 import { authenticate } from "../middlewares/auth";
-import { joinQueue } from "../controllers/joinqueue";
+import { updateTicketStatus } from "../controllers/updateTicket";
 
 const router = Router();
 
-router.post("/join", authenticate, joinQueue);
+router.patch("/ticket/:ticketId/status", authenticate, updateTicketStatus);
 
 export default router;

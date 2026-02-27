@@ -12,17 +12,25 @@ enum Role {
 }
 
 enum QueueStatus {
-  waiting    // in queue, not yet called
-  serving    // currently being served
-  done       // completed
-  skipped    // didn't respond when called
-  cancelled  // left the queue
+  waiting  
+  serving   
+  done   
+  skipped 
+  cancelled 
 }
 
 enum SessionStatus {
   active
   paused
   closed
+}
+
+enum FieldType {
+  text
+  number
+  email
+  phone
+  textarea
 }
 
 // ─── EXISTING MODELS ──────────────────────────────────────────────────────────
@@ -89,18 +97,37 @@ model UserProfile {
 model Room {
   id          Int      @id @default(autoincrement())
   companyId   Int
-  name        String   // e.g. "Customer Service", "Clinic Queue"
+  name        String
   description String?
-  secretKey   String   @unique  // user enters this to join the queue
+  secretKey   String   @unique
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  company  Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  sessions QueueSession[]
+  company     Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  sessions    QueueSession[]
+  formFields  RoomFormField[] 
 
   @@index([companyId])
 }
+
+model RoomFormField {
+  id        Int       @id @default(autoincrement())
+  roomId    Int
+  label     String    // e.g. "Full Name", "ID Card"
+  type      FieldType
+  required  Boolean   @default(true)
+  order     Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  room      Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  answers   TicketFormAnswer[]
+
+  @@index([roomId])
+}
+
+
+
 
 // ─── QUEUE SESSION ─────────────────────────────────────────────────────────────
 // Company manually opens and resets the queue via this model.
@@ -137,8 +164,23 @@ model QueueTicket {
   session QueueSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  answers TicketFormAnswer[] 
+
   @@unique([sessionId, number])  // no duplicate numbers in same session
   @@unique([sessionId, userId])  // one ticket per user per session
   @@index([sessionId])
   @@index([userId])
+}
+
+model TicketFormAnswer {
+  id        Int    @id @default(autoincrement())
+  ticketId  Int
+  fieldId   Int
+  value     String
+
+  ticket QueueTicket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  field  RoomFormField @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+
+  @@unique([ticketId, fieldId])
+  @@index([ticketId])
 }

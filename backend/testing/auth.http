@@ -26,7 +26,16 @@ Content-Type: application/json
 
 }
 
-### Register Customer
+### login company
+POST http://localhost:4000/auth/login
+Content-Type: application/json
+
+{
+    "email": "akuntumbal221203@gmail.com",
+  "password": "Password123"
+}
+
+### Register Customer 1
 POST http://localhost:4000/auth/register
 Content-Type: application/json
 
@@ -38,22 +47,37 @@ Content-Type: application/json
   "phone": "08123456789"
 }
 
-### login user
+### login user 1
 POST http://localhost:4000/auth/login
 Content-Type: application/json
 
 {
   "email":"bosanonymous684@gmail.com",
-  "password":"Password123"}
+  "password":"Password123"
+  }
 
-### login
+
+### Register Customer 2
+POST http://localhost:4000/auth/register
+Content-Type: application/json
+
+{
+  "email": "bengkelsarimertaproject@gmail.com",
+  "password": "Password123",
+  "role": "user",
+  "fullName": "satyanatha",
+  "phone": "08123456789"
+}
+
+### login user 2
 POST http://localhost:4000/auth/login
 Content-Type: application/json
 
 {
-    "email": "akuntumbal221203@gmail.com",
-  "password": "Password123"
-}
+  "email":"bengkelsarimertaproject@gmail.com",
+  "password":"Password123"
+  }
+
 
 ### logout
 POST http://localhost:4000/auth/logout

@@ -3,11 +3,10 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
-import crypto from "crypto";
-import { prisma } from "./config/prisma";
 import authRoutes from "./routes/auth";
 import roomRoutes from "./routes/room";
 import transactionRoutes from "./routes/transaction";
+import queueRoutes from "./routes/joinQueue";
 
 dotenv.config();
 
@@ -27,7 +26,8 @@ app.use(cookieParser());
 /* ================= ROUTES ================= */
 app.use("/auth", authRoutes);
 app.use("/rooms", roomRoutes);
-app.use("/queue", transactionRoutes);
+app.use("/queue", queueRoutes);
+app.use("/transactions", transactionRoutes);
 
 /* ================= HEALTH CHECK ================= */
 app.get("/", (_req, res) => {
@@ -39,5 +39,5 @@ const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
-  console.log(Object.keys(prisma));
+  console.log("server sudah berjalan baby");
 });
