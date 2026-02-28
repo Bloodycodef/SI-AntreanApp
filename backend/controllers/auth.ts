@@ -173,6 +173,7 @@ export const login = async (
 
   return res.status(200).json({
     message: "Login berhasil",
+    token: accessToken,
     user: {
       id: user.id,
       email: user.email,
@@ -272,7 +273,9 @@ export const verifyEmail = async (
 export const refreshToken = async (req: Request, res: Response) => {
   const token = req.cookies?.refresh_token;
   if (!token) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res
+      .status(401)
+      .json({ message: "Unauthorized atau tidak ada token" });
   }
 
   const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as {

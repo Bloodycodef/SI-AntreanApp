@@ -15,8 +15,10 @@ const app = express();
 /* ================= MIDDLEWARE ================= */
 app.use(
   cors({
-    origin: "http://localhost:3000", // frontend
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
 
@@ -31,7 +33,7 @@ app.use("/transactions", transactionRoutes);
 
 /* ================= HEALTH CHECK ================= */
 app.get("/", (_req, res) => {
-  res.json({ message: "API running" });
+  res.json({ message: "API running, berhasil terhubugn" });
 });
 
 /* ================= SERVER ================= */

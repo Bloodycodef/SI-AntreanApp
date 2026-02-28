@@ -1,15 +1,21 @@
 @baseUrl = http://localhost:4000
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwicm9sZSI6ImNvbXBhbnkiLCJpYXQiOjE3NzIxNjc2MzYsImV4cCI6MTc3MjE2ODUzNn0.53_H5p2DW3Rg0IuaxXVggdBA82yC1OAxHBJFOlQengc; Max-Age=900; Path=/; Expires=Fri, 27 Feb 2026 05:02:16 GMT; HttpOnly; SameSite=Strict,refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwiaWF0IjoxNzcyMTY3NjM2LCJleHAiOjE3NzI3NzI0MzZ9.VTe7mGNYVTImDOHp1qOHDpGddY0u7BwUhNOWvGqDUrU
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwicm9sZSI6ImNvbXBhbnkiLCJpYXQiOjE3NzIxOTUzODIsImV4cCI6MTc3MjE5NjI4Mn0.MATemutNp4gDYeoag0nekrelsyjJ65DZ7feF5DWGnig; Max-Age=900; Path=/; Expires=Fri, 27 Feb 2026 12:44:42 GMT; HttpOnly; SameSite=Strict,refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwiaWF0IjoxNzcyMTk1MzgyLCJleHAiOjE3NzI4MDAxODJ9.OV2nBTUwdq9KyldwF7tSIC4xsC78txIsdpb_9xCB2p0
+
+@roomId = 2
+
+
+### LOGIN
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-    "email": "akuntumbal221203@gmail.com",
+  "email": "akuntumbal221203@gmail.com",
   "password": "Password123"
 }
 
 
-### Create Room
+###
+# CREATE ROOM
 POST {{baseUrl}}/rooms
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -27,11 +33,59 @@ Content-Type: application/json
       "label": "ID Card Number",
       "type": "number",
       "required": true
-    }
+    }  
   ]
 }
 
-### Get Rooms
-GET {{baseUrl}}/rooms
+> {%
+  client.global.set("roomId", response.body.id);
+%}
+
+###
+# UPDATE ROOM
+PUT {{baseUrl}}/rooms/{{roomId}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
+
+{
+  "name": "Updated Customer Service Room",
+  "description": "Updated description",
+  "fields": [
+    {
+      "label": "Full Name",
+      "type": "text",
+      "required": true
+    },
+    {
+      "label": "National ID Number",
+      "type": "text",
+      "required": true
+    },
+     {
+      "label": "Email",
+      "type": "email",
+      "required": false
+    },
+    {
+      "label": "Phone Number",
+      "type": "text",
+      "required": false
+    }
+
+  ]
+}
+
+###
+# GET ROOMS (Verify Update)
+GET {{baseUrl}}/rooms
+Authorization: Bearer {{token}}
+
+###
+# DELETE ROOM
+DELETE {{baseUrl}}/rooms/2
+Authorization: Bearer {{token}}
+
+###
+# VERIFY DELETE (Should return empty or 404 if fetch by id)
+GET {{baseUrl}}/rooms
+Authorization: Bearer {{token}}

@@ -31,7 +31,6 @@ export const joinRoom = async (
     }
 
     // 1️⃣ Cari active session
-    // 1️⃣ Cari active session
     let activeSession = await prisma.queueSession.findFirst({
       where: {
         roomId: room.id,

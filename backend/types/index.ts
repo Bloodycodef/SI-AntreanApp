@@ -56,7 +56,13 @@ export interface CreateRoomFieldDTO {
 export interface UpdateRoomDTO {
   name?: string;
   description?: string;
-  isActive?: boolean;
+  fields?: {
+    id?: number;
+    label: string;
+    type: "text" | "number" | "email";
+    required: boolean;
+    order?: number;
+  }[];
 }
 
 // ─── QUEUE SESSION ────────────────────────────────────────────────────

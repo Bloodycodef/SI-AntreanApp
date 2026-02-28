@@ -75,83 +75,141 @@ export const storeRoom = async (
     });
   }
 };
-
-export const getRooms = async (req: Request, res: Response) => {
+export const getRooms = async (
+  req: Request,
+  res: Response,
+): Promise<Response> => {
   try {
-    if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
-    const company = await prisma.company.findUnique({
-      where: { userId: req.user.id },
-      include: { rooms: true },
-    });
-
-    if (!company) {
+    if (!req.user || req.user.role !== "company") {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
-    res.json(company.rooms);
-  } catch {
-    res.status(500).json({ message: "Failed to fetch rooms" });
+    const rooms = await prisma.room.findMany({
+      where: {
+        company: {
+          userId: req.user.id,
+        },
+      },
+      include: {
+        formFields: {
+          orderBy: { order: "asc" },
+        },
+      },
+    });
+
+    return res.json(rooms);
+  } catch (error) {
+    console.error("GET ROOMS ERROR:", error);
+    return res.status(500).json({
+      message: "Failed to fetch rooms",
+    });
   }
 };
 
 export const updateRoom = async (
   req: Request<{ id: string }, {}, UpdateRoomDTO>,
   res: Response,
-) => {
-  const roomId = Number(req.params.id);
-
+): Promise<Response> => {
   try {
-    if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
-    const room = await prisma.room.findUnique({
-      where: { id: roomId },
-      include: { company: true },
-    });
-
-    if (!room || room.company.userId !== req.user.id) {
+    if (!req.user || req.user.role !== "company") {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
-    const updated = await prisma.room.update({
-      where: { id: roomId },
-      data: req.body,
+    const roomId = Number(req.params.id);
+
+    const room = await prisma.room.findFirst({
+      where: {
+        id: roomId,
+        company: {
+          userId: req.user.id,
+        },
+      },
+      include: {
+        formFields: true,
+      },
     });
 
-    res.json(updated);
-  } catch {
-    res.status(500).json({ message: "Failed to update room" });
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    const updatedRoom = await prisma.$transaction(async (tx) => {
+      // Update basic info
+      const updated = await tx.room.update({
+        where: { id: roomId },
+        data: {
+          name: req.body.name,
+          description: req.body.description,
+        },
+      });
+
+      // If updating fields
+      if (req.body.fields) {
+        // Delete existing fields first (simplest safe approach)
+        await tx.roomFormField.deleteMany({
+          where: { roomId },
+        });
+
+        // Recreate fields
+        await tx.roomFormField.createMany({
+          data: req.body.fields.map((field, index) => ({
+            roomId,
+            label: field.label,
+            type: field.type,
+            required: field.required,
+            order: field.order ?? index,
+          })),
+        });
+      }
+
+      return tx.room.findUnique({
+        where: { id: roomId },
+        include: { formFields: true },
+      });
+    });
+
+    return res.json(updatedRoom);
+  } catch (error) {
+    console.error("UPDATE ROOM ERROR:", error);
+    return res.status(500).json({
+      message: "Failed to update room",
+    });
   }
 };
 
 export const deleteRoom = async (
   req: Request<{ id: string }>,
   res: Response,
-) => {
-  const roomId = Number(req.params.id);
-
+): Promise<Response> => {
   try {
-    if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
-    const room = await prisma.room.findUnique({
-      where: { id: roomId },
-      include: { company: true },
-    });
-
-    if (!room || room.company.userId !== req.user.id) {
+    if (!req.user || req.user.role !== "company") {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
-    await prisma.room.delete({ where: { id: roomId } });
+    const roomId = Number(req.params.id);
 
-    res.json({ message: "Room deleted" });
-  } catch {
-    res.status(500).json({ message: "Failed to delete room" });
+    const room = await prisma.room.findFirst({
+      where: {
+        id: roomId,
+        company: {
+          userId: req.user.id,
+        },
+      },
+    });
+
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    await prisma.room.delete({
+      where: { id: roomId },
+    });
+
+    return res.json({ message: "Room deleted successfully" });
+  } catch (error) {
+    console.error("DELETE ROOM ERROR:", error);
+    return res.status(500).json({
+      message: "Failed to delete room",
+    });
   }
 };
