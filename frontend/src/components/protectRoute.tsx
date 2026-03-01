@@ -1,20 +1,26 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
+import { useEffect } from "react";
 import type { ProtectedRouteProps } from "@/types";
 
-export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
-  const { token, user } = useAuthStore();
+interface ProtectedRouteWithChildrenProps extends ProtectedRouteProps {
+  children: React.ReactNode;
+}
 
-  // 1. If not logged in, redirect to login
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
+export const ProtectedRoute = ({
+  allowedRoles,
+  children,
+}: ProtectedRouteWithChildrenProps) => {
+  const { user, loading, getMe } = useAuthStore();
 
-  // 2. If logged in but role doesn't match, redirect to a "not authorized" page (optional)
-  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+  useEffect(() => {
+    if (!user) getMe().catch(() => {});
+  }, [user, getMe]);
+
+  if (loading) return <div>Loading...</div>;
+  if (!user) return <Navigate to="/login" replace />;
+  if (allowedRoles && !allowedRoles.includes(user.role))
     return <Navigate to="/unauthorized" replace />;
-  }
 
-  // 3. If everything is fine, render the child routes
-  return <Outlet />;
+  return <>{children}</>;
 };

@@ -1,42 +1,43 @@
 import { create } from "zustand";
 import api from "@/api/axios";
-import type { LoginInput, RegisterInput, AuthResponse } from "@/types";
+import type { LoginInput, RegisterInput, MeResponse } from "@/types";
 
 interface AuthState {
-  user: AuthResponse["user"] | null;
-  token: string | null;
-  login: (data: LoginInput) => Promise<AuthResponse>;
-  register: (data: RegisterInput) => Promise<AuthResponse>;
-  logout: () => void;
-  setAuth: (user: AuthResponse["user"], token: string) => void;
+  user: MeResponse | null;
+  loading: boolean;
+  login: (data: LoginInput) => Promise<MeResponse>;
+  register: (data: RegisterInput) => Promise<void>;
+  logout: () => Promise<void>;
+  getMe: () => Promise<MeResponse>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  token: localStorage.getItem("token"),
-
-  setAuth: (user, token) => {
-    localStorage.setItem("token", token);
-    set({ user, token });
-  },
+  loading: false,
 
   login: async (data) => {
-    const res = await api.post<AuthResponse>("/auth/login", data);
-    const { user, token } = res.data;
+    await api.post("/auth/login", data);
 
-    localStorage.setItem("token", token);
-    set({ user, token });
+    // After cookie is set, fetch user
+    const res = await api.get<MeResponse>("/auth/me");
 
-    return res.data;
+    set({ user: res.data });
+
+    return res.data; // ✅ return user
   },
 
   register: async (data) => {
-    const res = await api.post<AuthResponse>("/auth/register", data);
-    return res.data;
+    await api.post("/auth/register", data);
   },
 
-  logout: () => {
-    localStorage.removeItem("token");
-    set({ user: null, token: null });
+  logout: async () => {
+    await api.post("/auth/logout");
+    set({ user: null });
+  },
+
+  getMe: async () => {
+    const res = await api.get<MeResponse>("/auth/me");
+    set({ user: res.data });
+    return res.data; //
   },
 }));

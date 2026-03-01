@@ -5,7 +5,8 @@ export interface RegisterInput {
   email: string;
   password: string;
   role: UserRole;
-
+  fullName?: string;
+  phone?: string;
   companyName?: string;
   industry?: string;
   website?: string;
@@ -29,4 +30,16 @@ export interface AuthResponse {
 
 export interface ProtectedRouteProps {
   allowedRoles?: UserRole[];
+}
+
+export interface MeResponse {
+  id: number;
+  email: string;
+  role: UserRole;
+  companyName?: string;
+  industry?: string | null;
+  website?: string | null;
+  address?: string | null;
+  fullName?: string;
+  phone?: string | null;
 }

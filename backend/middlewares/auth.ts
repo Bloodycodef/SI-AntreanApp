@@ -20,7 +20,7 @@ export const authenticate = (
     const decoded = jwt.verify(token, JWT_ACCESS_SECRET) as JwtPayload;
 
     req.user = {
-      id: Number(decoded.userId), // ✅ FIXED
+      id: Number(decoded.userId), //
       role: decoded.role,
     };
 

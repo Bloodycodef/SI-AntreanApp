@@ -40,6 +40,12 @@ declare global {
   }
 }
 
+export interface AuthRequest extends Request {
+  user?: {
+    id: number;
+  };
+}
+
 // ─── ROOM ──────────────────────────────────────────────────────────────
 export interface CreateRoomDTO {
   name: string;

@@ -4,7 +4,11 @@ import crypto from "crypto";
 import jwt from "jsonwebtoken";
 
 import { prisma } from "../config/prisma";
-import { RegisterRequestBody, LoginRequestBody } from "../types/index";
+import {
+  RegisterRequestBody,
+  LoginRequestBody,
+  AuthRequest,
+} from "../types/index";
 import { sendVerificationEmail } from "../utils/verificationEmail";
 import { JwtPayload } from "../types/index";
 
@@ -173,7 +177,6 @@ export const login = async (
 
   return res.status(200).json({
     message: "Login berhasil",
-    token: accessToken,
     user: {
       id: user.id,
       email: user.email,
@@ -225,6 +228,57 @@ export const logout = async (
     return res.status(500).json({
       message: "Internal server error",
     });
+  }
+};
+
+export const getMe = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        company: true,
+        profile: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const baseData = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    if (user.role === "company" && user.company) {
+      return res.json({
+        ...baseData,
+        companyName: user.company.companyName,
+        industry: user.company.industry,
+        website: user.company.website,
+        address: user.company.address,
+      });
+    }
+
+    if (user.role === "user" && user.profile) {
+      return res.json({
+        ...baseData,
+        fullName: user.profile.fullName,
+        phone: user.profile.phone,
+      });
+    }
+
+    return res.json(baseData);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 

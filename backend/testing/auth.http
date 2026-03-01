@@ -1,3 +1,6 @@
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwicm9sZSI6ImNvbXBhbnkiLCJpYXQiOjE3NzIyODAwNTAsImV4cCI6MTc3MjI4MDk1MH0.K5ZcXUwA7-zbsTGQFXQXEeZIIaWM-7C1jX1Tv-O_2LQ; Max-Age=900; Path=/; Expires=Sat, 28 Feb 2026 12:15:50 GMT; HttpOnly; SameSite=Strict,refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwiaWF0IjoxNzcyMjgwMDUwLCJleHAiOjE3NzI4ODQ4NTB9.77ePS0lYXeYkdedqSJwRnzuHHuGLO_ZA3Grzh51CkPg
+
+
 ### Register User
 POST http://localhost:4000/auth/register
 Content-Type: application/json
@@ -16,7 +19,7 @@ POST http://localhost:4000/auth/register
 Content-Type: application/json
 
 {
-    "email": "akuntumbal221203@gmail.com",
+  "email": "akuntumbal221203@gmail.com",
   "password": "Password123",
   "role": "company",
   "companyName": "PT Maju Jaya Sejahtera",
@@ -83,3 +86,6 @@ Content-Type: application/json
 POST http://localhost:4000/auth/logout
 
 
+### get me
+GET http://localhost:4000/auth/me
+Authorization: {{token}}
